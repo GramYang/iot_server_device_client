@@ -1,24 +1,16 @@
-# iot_server4_client
+# iot_server_device_client
+配合iot_server_device的简易前端demo，测试用，实现了所有对接iot_server_device的接口。
 
-## Project setup
-```
-npm install
-```
+## websocket消息
+与cellnet+websocket配合，使用arraybuffer数据类型，因为websocket本身帮你处理好了粘包，因此数据格式为tv=type+value。type用2个字节表示一个整数msgid，value为数据对象的json。
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+## websocket心跳
+前端
+在websocket连接成功和收到后端消息后，前端发送心跳包，先发送一个心跳包然后等待响应，如果没有响应则断线重连以触发另一个心跳包发送。
+后端
+收到心跳包后afterfunc延迟心跳时间后发送心跳包响应。如果在延迟时间内又收到心跳包则取消此afterfunc调用新建一个afterfunc调用。
 
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+## store
+因为消息是异步的，因此将websocket响应的消息写入store，然后store变化驱动前端控件变化。
+使用computed取出store里的state变量，然后watch这个computed将新值写入data。为什么这么做？
+因为computed不是响应式的；且直接用方法将store值赋给data，store变化后data不会跟着变。
